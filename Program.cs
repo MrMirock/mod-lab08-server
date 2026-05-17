@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -179,7 +179,8 @@ namespace Lab08_CMO
             Client client = new Client(server);
             Random rand = new Random();
 
-            DateTime endTime = DateTime.Now.AddSeconds(durationSec);
+            DateTime startTime = DateTime.Now;               // ЗАПОМИНАЕМ СТАРТ
+            DateTime endTime = startTime.AddSeconds(durationSec);
             int requestId = 0;
 
             while (DateTime.Now < endTime)
@@ -188,12 +189,11 @@ namespace Lab08_CMO
                 int ms = (int)(interval * 1000);
                 if (ms > 0) Thread.Sleep(ms);
                 if (DateTime.Now >= endTime) break;
-
                 client.GenerateRequest(++requestId);
             }
 
             server.Stop();
-            double realTime = (DateTime.Now - endTime.AddSeconds(durationSec)).TotalSeconds;
+            double realTime = (DateTime.Now - startTime).TotalSeconds;
 
             double expP0 = server.GetIdleProbability();
             double expPout = (double)server.Rejected / server.TotalRequests;
@@ -252,7 +252,8 @@ namespace Lab08_CMO
                 foreach (var d in results)
                 {
                     var invariant = CultureInfo.InvariantCulture;
-                    csv.WriteLine($"{d.Lambda.ToString(invariant)},{d.ExpP0.ToString(invariant)},{d.TheorP0.ToString(invariant)},...");
+                    csv.WriteLine($"{d.Lambda.ToString(invariant)},{d.ExpP0.ToString(invariant)},{d.TheorP0.ToString(invariant)},{d.ExpPout.ToString(invariant)},{d.TheorPout.ToString(invariant)}," +
+                                  $"{d.ExpQ.ToString(invariant)},{d.TheorQ.ToString(invariant)},{d.ExpA.ToString(invariant)},{d.TheorA.ToString(invariant)},{d.ExpAvgBusy.ToString(invariant)},{d.TheorAvgBusy.ToString(invariant)}");
                 }
             }
         }
@@ -274,6 +275,7 @@ namespace Lab08_CMO
                 w.WriteLine("λ\tВсего заявок\tОбслужено\tОтказано");
                 foreach (var d in results)
                     w.WriteLine($"{d.Lambda:F2}\t{d.Total}\t{d.Processed}\t{d.Rejected}");
+
             }
         }
     }
